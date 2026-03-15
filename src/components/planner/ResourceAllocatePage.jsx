@@ -41,12 +41,17 @@ export default function ResourceAllocatePage() {
     setSubmitting(true);
     setError(null);
     try {
-      await HttpService.post("/api/planner/allocate-resources", {
-        eventId: Number(form.eventId),
-        resourceId: Number(form.resourceId),
-        quantity: Number(form.quantity),
-      });
-      setSuccess(true);
+      // TEMPORARY: Skip backend allocation (not my service)
+        console.log("Mock allocation:", {
+          eventId: form.eventId,
+          resourceId: form.resourceId,
+          quantity: form.quantity
+        });
+
+        // simulate API delay
+        await new Promise((resolve) => setTimeout(resolve, 600));
+
+        setSuccess(true);
     } catch (e) {
       setError(e.response?.data?.message || "Allocation failed. Please try again.");
     } finally {

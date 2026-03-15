@@ -1,36 +1,36 @@
-// import axios from "axios";
-// import AuthService from "./authService";
+import axios from "axios";
+import AuthService from "./authService";
 
-// const BASE_URL = "http://localhost:8080";
+const BASE_URL = "http://localhost:8080";
 
-// const axiosInstance = axios.create({
-//   baseURL: BASE_URL,
-//   headers: { "Content-Type": "application/json" },
-// });
+const axiosInstance = axios.create({
+  baseURL: BASE_URL,
+  headers: { "Content-Type": "application/json" },
+});
 
-// // Attach JWT token to every request
-// axiosInstance.interceptors.request.use(
-//   (config) => {
-//     const token = AuthService.getToken();
-//     if (token) {
-//       config.headers["Authorization"] = `Bearer ${token}`;
-//     }
-//     return config;
-//   },
-//   (error) => Promise.reject(error)
-// );
+// Attach JWT token to every request
+axiosInstance.interceptors.request.use(
+  (config) => {
+    const token = AuthService.getToken();
+    if (token) {
+      config.headers["Authorization"] = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
 
-// // Handle 401 — token expired or invalid
-// axiosInstance.interceptors.response.use(
-//   (response) => response,
-//   (error) => {
-//     if (error.response?.status === 401) {
-//       AuthService.logout();
-//       window.location.href = "/login";
-//     }
-//     return Promise.reject(error);
-//   }
-// );
+// Handle 401 — token expired or invalid
+axiosInstance.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      AuthService.logout();
+      window.location.href = "/login";
+    }
+    return Promise.reject(error);
+  }
+);
 
 // const HttpService = {
 //   get: (url, params = {}) => axiosInstance.get(url, { params }),
@@ -43,8 +43,6 @@
 
 
 
-// ── MOCK MODE — All API calls return fake data ──
-// To switch to real backend: replace each mock response with real axios calls
 
 // ── MOCK MODE — All API calls return fake data ──
 // To switch to real backend: replace each mock response with real axios calls
@@ -451,34 +449,158 @@ const MOCK_RESOURCES = [
   { resourceId: 7, name: "Conference Room B", type: "VENUE", availability: true },
 ];
 
-// ── Mock API Router ──
+
+
+
+
+// // ── Mock API Router ──
+// const mockGet = async (url) => {
+
+//   // ---- REAL BACKEND CALLS (Member 4 & 5 APIs) ----
+//   if (url.includes("/api/planner/dashboard/events")) {
+//     return axiosInstance.get(url);
+//   }
+
+//   if (url.match(/\/api\/planner\/event\/(\d+)\/allocations/)) {
+//     return axiosInstance.get(url);
+//   }
+
+//   if (url.match(/\/api\/planner\/resource\/(\d+)\/allocations/)) {
+//     return axiosInstance.get(url);
+//   }
+
+//   await delay();
+//   if (url.includes("/api/planner/completed-events")) return { data: MOCK_EVENTS.filter((e) => e.status === "COMPLETED") };
+//   if (url.includes("/api/planner/events")) return { data: MOCK_EVENTS };
+//   if (url.includes("/api/planner/resources/available"))
+//     return { data: MOCK_RESOURCES.filter((r) => r.availability) };
+//   if (url.match(/\/api\/staff\/event-details\/(\d+)/)) {
+//     const id = parseInt(url.split("/").pop());
+//     const event = MOCK_EVENTS.find((e) => e.eventId === id) || MOCK_EVENTS[0];
+//     return {
+//       data: {
+//         ...event,
+//         resources: event.allocations.map((a) => ({ ...a.resource, quantity: a.quantity })),
+//       },
+//     };
+//   }
+//   if (url.match(/\/api\/client\/booking-details\/(\d+)/)) {
+//     const id = parseInt(url.split("/").pop());
+//     const event = MOCK_EVENTS.find((e) => e.eventId === id) || MOCK_EVENTS[0];
+//     return { data: { ...event, allocatedResources: event.allocations.map((a) => ({ ...a.resource, quantity: a.quantity })) } };
+//   }
+//   return { data: [] };
+// };
+
+// const mockPost = async (url, data) => {
+//   await delay();
+//   console.log(`[MOCK POST] ${url}`, data);
+//   return { data: { message: "Success", ...data } };
+
+//   if (url.includes("/api/planner/allocate-resources")) {
+//     return axiosInstance.post(url, data);
+//   }
+// };
+
+// const mockPut = async (url, data) => {
+//   await delay();
+//   console.log(`[MOCK PUT] ${url}`, data);
+//   return { data: { message: "Updated successfully", ...data } };
+// };
+
+// const HttpService = {
+//   get: (url, params = {}) => mockGet(url),
+//   post: (url, data = {}) => mockPost(url, data),
+//   put: (url, data = {}) => mockPut(url, data),
+//   delete: (url) => delay().then(() => ({ data: { message: "Deleted" } })),
+// };
+
+// export default HttpService;
+
+
 const mockGet = async (url) => {
+
+  // ---- REAL BACKEND CALLS (Member 4 & 5 APIs) ----
+ if (url.includes("/api/planner/dashboard/events")) {
+  return axios.get("http://localhost:8081/api/planner/dashboard/events");
+}
+
+  if (url.includes("/api/planner/events")) {
+  return axiosInstance.get(url);
+}
+
+  if (url.match(/\/api\/planner\/event\/(\d+)\/allocations/)) {
+    return axiosInstance.get(url);
+  }
+
+  if (url.match(/\/api\/planner\/resource\/(\d+)\/allocations/)) {
+    return axiosInstance.get(url);
+  }
+
+  // ---- MOCK ROUTES ----
   await delay();
-  if (url.includes("/api/planner/completed-events")) return { data: MOCK_EVENTS.filter((e) => e.status === "COMPLETED") };
-  if (url.includes("/api/planner/events")) return { data: MOCK_EVENTS };
+
+  if (url.includes("/api/planner/completed-events"))
+    return { data: MOCK_EVENTS.filter((e) => e.status === "COMPLETED") };
+
+  if (url.includes("/api/planner/events"))
+    return { data: MOCK_EVENTS };
+
   if (url.includes("/api/planner/resources/available"))
     return { data: MOCK_RESOURCES.filter((r) => r.availability) };
+
   if (url.match(/\/api\/staff\/event-details\/(\d+)/)) {
     const id = parseInt(url.split("/").pop());
     const event = MOCK_EVENTS.find((e) => e.eventId === id) || MOCK_EVENTS[0];
+
     return {
       data: {
         ...event,
-        resources: event.allocations.map((a) => ({ ...a.resource, quantity: a.quantity })),
-      },
+        resources: event.allocations.map((a) => ({
+          ...a.resource,
+          quantity: a.quantity
+        }))
+      }
     };
   }
+
   if (url.match(/\/api\/client\/booking-details\/(\d+)/)) {
     const id = parseInt(url.split("/").pop());
     const event = MOCK_EVENTS.find((e) => e.eventId === id) || MOCK_EVENTS[0];
-    return { data: { ...event, allocatedResources: event.allocations.map((a) => ({ ...a.resource, quantity: a.quantity })) } };
+
+    return {
+      data: {
+        ...event,
+        allocatedResources: event.allocations.map((a) => ({
+          ...a.resource,
+          quantity: a.quantity
+        }))
+      }
+    };
   }
+
   return { data: [] };
 };
 
 const mockPost = async (url, data) => {
+
+  // ---- REAL BACKEND CALL ----
+  if (url.includes("/api/planner/allocate-resources")) {
+    return axiosInstance.post(url, data);
+  }
+
+  if (url.includes("/api/planner/resource")) {
+  return axiosInstance.post(url, data);
+}
+
+if (url.includes("/api/planner/event")) {
+  return axiosInstance.post(url, data);
+}
+
+  // ---- MOCK ROUTE ----
   await delay();
   console.log(`[MOCK POST] ${url}`, data);
+
   return { data: { message: "Success", ...data } };
 };
 
@@ -489,7 +611,7 @@ const mockPut = async (url, data) => {
 };
 
 const HttpService = {
-  get: (url, params = {}) => mockGet(url),
+  get: (url, params = {}) => mockGet(url, params),
   post: (url, data = {}) => mockPost(url, data),
   put: (url, data = {}) => mockPut(url, data),
   delete: (url) => delay().then(() => ({ data: { message: "Deleted" } })),

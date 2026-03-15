@@ -27,8 +27,17 @@ export default function AddResourceForm() {
     if (err) { setError(err); return; }
     setLoading(true);
     try {
-      await HttpService.post("/api/planner/resource", form);
-      setSuccess(true);
+      console.log("Adding resource:", form);
+    
+  const resourceData = {
+    name: form.name,
+    type: form.type,
+    availability: form.availability
+  };
+
+  await HttpService.post("/api/planner/resource", resourceData);
+    
+    setSuccess(true);
     } catch (e) {
       setError(e.response?.data?.message || "Failed to add resource.");
     } finally {

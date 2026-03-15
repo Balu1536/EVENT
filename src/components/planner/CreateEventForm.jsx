@@ -22,19 +22,33 @@ export default function CreateEventForm() {
     return null;
   };
 
-  const handleSubmit = async () => {
-    const err = validate();
-    if (err) { setError(err); return; }
-    setLoading(true);
-    try {
-      await HttpService.post("/api/planner/event", form);
-      setSuccess(true);
-    } catch (e) {
-      setError(e.response?.data?.message || "Failed to create event. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
+ const handleSubmit = async () => {
+  const err = validate();
+  if (err) {
+    setError(err);
+    return;
+  }
+
+  setLoading(true);
+
+  try {
+
+    const eventData = {
+      ...form,
+      status: "PLANNED"
+    };
+
+    await HttpService.post("/api/planner/event", eventData);
+
+    setSuccess(true);
+setForm({ title: "", description: "", dateTime: "", location: "" });
+
+  } catch (e) {
+    setError(e.response?.data?.message || "Failed to create event. Please try again.");
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleReset = () => {
     setForm({ title: "", description: "", dateTime: "", location: "" });

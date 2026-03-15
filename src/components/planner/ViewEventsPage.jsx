@@ -16,29 +16,42 @@ export default function ViewEventsPage() {
   const [expandedId, setExpandedId] = useState(null);
 
   useEffect(() => {
-    HttpService.get("/api/planner/events")
-      .then((res) => setEvents(res.data))
-      .catch(() => setError("Failed to load events."))
-      .finally(() => setLoading(false));
-  }, []);
+  const loadEvents = async () => {
+    try {
+      const res = await HttpService.get("/api/planner/dashboard/events");
+      setEvents(res.data);
+    } catch (err) {
+      console.error(err);
+      setError("Failed to load events.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  loadEvents();
+}, []);
 
   const filtered = events.filter((e) => {
     const matchSearch = e.title?.toLowerCase().includes(search.toLowerCase()) ||
       e.location?.toLowerCase().includes(search.toLowerCase());
-    const matchStatus = filterStatus === "ALL" || e.status === filterStatus;
-    return matchSearch && matchStatus;
+    const matchStatus =
+      filterStatus === "ALL" ||
+      (e.status && e.status.toUpperCase() === filterStatus);
+      return matchSearch && matchStatus;
   });
 
   const stats = {
     total: events.length,
-    planned: events.filter((e) => e.status === "PLANNED").length,
-    ongoing: events.filter((e) => e.status === "ONGOING").length,
-    completed: events.filter((e) => e.status === "COMPLETED").length,
+    planned: events.filter((e) => e.status?.toUpperCase() === "PLANNED").length,
+    ongoing: events.filter((e) => e.status?.toUpperCase() === "ONGOING").length,
+    completed: events.filter((e) => e.status?.toUpperCase() === "COMPLETED").length,
   };
 
-  const formatDate = (dt) => new Date(dt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
-  const formatTime = (dt) => new Date(dt).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
+  const formatDate = (dt) =>
+  dt ? new Date(dt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "";
 
+  const formatTime = (dt) =>
+  dt ? new Date(dt).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }) : "";
   return (
     <div className="vep-page">
       <Navbar />
@@ -139,7 +152,7 @@ export default function ViewEventsPage() {
                         <p className="vep-no-alloc">No resources allocated yet. <a href="/planner/allocate" className="vep-link">Allocate now →</a></p>
                       ) : (
                         <div className="vep-alloc-grid">
-                          {event.allocations.map((a) => (
+                          {(event.allocations || []).map((a) => (
                             <div key={a.allocationId} className="vep-alloc-item">
                               <span>{TYPE_ICON[a.resource?.type] || "📦"}</span>
                               <div>
